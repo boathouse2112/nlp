@@ -43,20 +43,8 @@ def count_ngrams(words, order):
         return Counter(zip(*offset_words))
 
 
-def count_unigrams(words):
-    return Counter(words)
-
-
-def count_bigrams(words):
-    return Counter(zip(words, words[1:]))
-
-
-def count_trigrams(words):
-    return Counter(zip(words, words[1:], words[2:]))
-
-
 # For ("a", "b"), find the sum of occurrence counts of trigrams "a b *" where * != "<s>" or "</s>"
-def count_wildcard_ngrams(ngram_counts, context):
+def count_wildcard_ngram_occurrences(ngram_counts, context):
     matching_ngram_counts = [
         count
         for (ngram, count) in ngram_counts.items()
@@ -87,15 +75,32 @@ def count_wildcard_ngram_types(ngram_counts, context):
 #     return discounted_bigram_count / previous_unigram_count
 
 
-def discounted_trigram_term(bigram_counts, trigram_counts, a, b, c):
-    trigram_count = trigram_counts[(a, b, c)]
-    discounted_trigram_count = trigram_count - ABSOLUTE_DISCOUNT
-    discounted_trigram_count = max(discounted_trigram_count, 0)
+# def discounted_trigram_term(words, trigram):
+#     trigram_counts = count_ngrams(words, 3)
+#     context = trigram[:-1]
 
-    wildcard_trigram_count = count_wildcard_ngrams(trigram_counts, (a, b))
-    print(discounted_trigram_count)
-    print(wildcard_trigram_count)
-    return discounted_trigram_count / wildcard_trigram_count
+#     trigram_count = trigram_counts[trigram]
+#     discounted_trigram_count = trigram_count - ABSOLUTE_DISCOUNT
+#     discounted_trigram_count = max(discounted_trigram_count, 0)
+
+#     wildcard_trigram_count = count_wildcard_ngram_occurrences(trigram_counts, context)
+#     print(discounted_trigram_count)
+#     print(wildcard_trigram_count)
+#     return discounted_trigram_count / wildcard_trigram_count
+
+
+def discounted_ngram_term(words, order, ngram):
+    ngram_counts = count_ngrams(words, order)
+    context = ngram[:-1]
+
+    ngram_count = ngram_counts[ngram]
+    discounted_ngram_count = ngram_count - ABSOLUTE_DISCOUNT
+    discounted_ngram_count = max(discounted_ngram_count, 0)
+
+    wildcard_ngram_count = count_wildcard_ngram_occurrences(ngram_counts, context)
+    print(discounted_ngram_count)
+    print(wildcard_ngram_count)
+    return discounted_ngram_count / wildcard_ngram_count
 
 
 # It's not a term...
@@ -108,10 +113,8 @@ def main():
     # words = ["<s>", *tokenize(EXAMPLE_TEXT), "</s>"]
     # print(words)
 
-    unigram_counts = count_unigrams(words)
-    bigram_counts = count_bigrams(words)
-    trigram_counts = count_trigrams(words)
-    # discounted_trigram_term(bigram_counts, trigram_counts, "a", "paragraph", "is")
+    discounted_trigram_term(words, ("a", "paragraph", "is"))
+    discounted_ngram_term(words, 3, ("a", "paragraph", "is"))
 
 
 if __name__ == "__main__":
